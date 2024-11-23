@@ -1,0 +1,244 @@
+// // This is your Prisma schema file,
+// // learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// generator client {
+//   provider = "prisma-client-js"
+// }
+
+// datasource db {
+//   provider = "mysql"
+//   url      = env("DATABASE_URL")
+// }
+
+// model User {
+//   id          Int          @id @default(autoincrement())
+//   email       String       @unique
+//   name        String
+//   password    String
+//   role        Role // Enum for user roles like "AUTHOR", "REVIEWER", "ADMIN"
+//   comments    Comment[]
+//   submissions Thesis[]
+//   reviews     PeerReview[] // Added to complete relation with PeerReview
+//   createdAt   DateTime     @default(now())
+// }
+
+// model Thesis {
+//   id          Int          @id @default(autoincrement())
+//   title       String
+//   abstract    String
+//   author      User         @relation(fields: [authorId], references: [id])
+//   authorId    Int
+//   submittedAt DateTime     @default(now())
+//   views       Int          @default(0)
+//   downloads   Int          @default(0)
+//   status      ThesisStatus // Enum for "PENDING", "APPROVED", "REJECTED"
+//   year        Int
+//   fileUrl     String
+//   comments    Comment[]
+//   peerReviews PeerReview[]
+//   keywords    Keyword[] // Replaced primitive list with a relation to Keyword
+//   topics      Topic[] // Replaced primitive list with a relation to Topic
+//   statistics  Statistics? // Added to complete relation with Statistics
+// }
+
+// model Comment {
+//   id        Int      @id @default(autoincrement())
+//   content   String
+//   author    User     @relation(fields: [authorId], references: [id])
+//   authorId  Int
+//   thesis    Thesis   @relation(fields: [thesisId], references: [id])
+//   thesisId  Int
+//   createdAt DateTime @default(now())
+// }
+
+// model PeerReview {
+//   id         Int      @id @default(autoincrement())
+//   thesis     Thesis   @relation(fields: [thesisId], references: [id])
+//   thesisId   Int
+//   reviewer   User     @relation(fields: [reviewerId], references: [id])
+//   reviewerId Int
+//   comments   String
+//   rating     Int
+//   reviewedAt DateTime @default(now())
+// }
+
+// model Statistics {
+//   id             Int      @id @default(autoincrement())
+//   thesis         Thesis   @relation(fields: [thesisId], references: [id])
+//   thesisId       Int      @unique // Ensure unique relation for one-to-one
+//   views          Int      @default(0)
+//   downloads      Int      @default(0)
+//   lastViewed     DateTime
+//   lastDownloaded DateTime
+// }
+
+// model SubmissionGuideline {
+//   id        Int      @id @default(autoincrement())
+//   title     String
+//   content   String
+//   updatedAt DateTime @default(now())
+// }
+
+// model ContactFormSubmission {
+//   id          Int      @id @default(autoincrement())
+//   name        String
+//   email       String
+//   subject     String
+//   message     String
+//   submittedAt DateTime @default(now())
+// }
+
+// model Keyword {
+//   id     Int      @id @default(autoincrement())
+//   name   String
+//   thesis Thesis[] // Removed references argument
+// }
+
+// model Topic {
+//   id     Int      @id @default(autoincrement())
+//   name   String
+//   thesis Thesis[] // Removed references argument
+// }
+
+// enum Role {
+//   AUTHOR
+//   REVIEWER
+//   ADMIN
+// }
+
+// enum ThesisStatus {
+//   PENDING
+//   APPROVED
+//   REJECTED
+// }
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          Int          @id @default(autoincrement())
+  email       String       @unique
+  name        String
+  password    String
+  role        Role // Enum for user roles like "AUTHOR", "REVIEWER", "ADMIN"
+  comments    Comment[]
+  submissions Thesis[]
+  reviews     PeerReview[] // Added to complete relation with PeerReview
+  messages    Message[]
+  chats       Chat[]       @relation("ChatParticipants")
+  createdAt   DateTime     @default(now())
+}
+
+model Thesis {
+  id          Int          @id @default(autoincrement())
+  title       String
+  abstract    String
+  author      User         @relation(fields: [authorId], references: [id])
+  authorId    Int
+  submittedAt DateTime     @default(now())
+  views       Int          @default(0)
+  downloads   Int          @default(0)
+  status      ThesisStatus // Enum for "PENDING", "APPROVED", "REJECTED"
+  year        Int
+  fileUrl     String
+  comments    Comment[]
+  peerReviews PeerReview[]
+  keywords    Keyword[] // Replaced primitive list with a relation to Keyword
+  topics      Topic[] // Replaced primitive list with a relation to Topic
+  statistics  Statistics? // Added to complete relation with Statistics
+}
+
+model Comment {
+  id        Int      @id @default(autoincrement())
+  content   String
+  author    User     @relation(fields: [authorId], references: [id])
+  authorId  Int
+  thesis    Thesis   @relation(fields: [thesisId], references: [id])
+  thesisId  Int
+  createdAt DateTime @default(now())
+}
+
+model PeerReview {
+  id         Int      @id @default(autoincrement())
+  thesis     Thesis   @relation(fields: [thesisId], references: [id])
+  thesisId   Int
+  reviewer   User     @relation(fields: [reviewerId], references: [id])
+  reviewerId Int
+  comments   String
+  rating     Int
+  reviewedAt DateTime @default(now())
+}
+
+model Statistics {
+  id             Int      @id @default(autoincrement())
+  thesis         Thesis   @relation(fields: [thesisId], references: [id])
+  thesisId       Int      @unique // Ensure unique relation for one-to-one
+  views          Int      @default(0)
+  downloads      Int      @default(0)
+  lastViewed     DateTime
+  lastDownloaded DateTime
+}
+
+model SubmissionGuideline {
+  id        Int      @id @default(autoincrement())
+  title     String
+  content   String
+  updatedAt DateTime @default(now())
+}
+
+model ContactFormSubmission {
+  id          Int      @id @default(autoincrement())
+  name        String
+  email       String
+  subject     String
+  message     String
+  submittedAt DateTime @default(now())
+}
+
+model Keyword {
+  id     Int      @id @default(autoincrement())
+  name   String
+  thesis Thesis[] // Removed references argument
+}
+
+model Topic {
+  id     Int      @id @default(autoincrement())
+  name   String
+  thesis Thesis[] // Removed references argument
+}
+
+model Chat {
+  id           Int       @id @default(autoincrement())
+  participants User[]    @relation("ChatParticipants") // Many-to-many relationship with users
+  messages     Message[]
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt // Auto-updated when a message is sent
+}
+
+model Message {
+  id        Int       @id @default(autoincrement())
+  sender    User      @relation(fields: [senderId], references: [id])
+  senderId  Int
+  chat      Chat      @relation(fields: [chatId], references: [id])
+  chatId    Int
+  content   String
+  createdAt DateTime  @default(now())
+  readAt    DateTime? // Optional timestamp for when the message was read
+}
+
+enum Role {
+  AUTHOR
+  REVIEWER
+  ADMIN
+}
+
+enum ThesisStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
