@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Bar, Pie } from "react-chartjs-2";
+import { withAuthorization } from "../../hoc/withAuthorization";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -48,7 +49,6 @@ const Statistics = () => {
     return <p className="text-center text-white">No statistics available.</p>;
   }
 
-  // Prepare data for charts
   const barChartData = {
     labels: thesisData.map((thesis) => thesis.title),
     datasets: [
@@ -89,17 +89,13 @@ const Statistics = () => {
       <h2 className="text-3xl font-bold text-gray-400 text-center">
         Thesis Statistics Dashboard
       </h2>
-
       <div className="flex flex-wrap justify-around mt-10 max-w-6xl mx-auto">
-        {/* Bar Chart */}
         <div className="bg-neutral p-6 rounded-lg shadow-lg w-full md:w-1/2 mb-6">
           <h3 className="text-2xl font-bold text-gray-300 mb-4 text-center">
             Views vs Downloads (Bar Chart)
           </h3>
           <Bar data={barChartData} options={{ responsive: true }} />
         </div>
-
-        {/* Pie Chart */}
         <div className="bg-neutral p-6 rounded-lg shadow-lg w-full md:w-1/2 mb-6">
           <h3 className="text-2xl font-bold text-gray-300 mb-4 text-center">
             Overall Views vs Downloads (Pie Chart)
@@ -107,36 +103,8 @@ const Statistics = () => {
           <Pie data={pieChartData} options={{ responsive: true }} />
         </div>
       </div>
-
-      {/* Thesis Data Table */}
-      <div className="mt-10 max-w-4xl mx-auto">
-        <h3 className="text-2xl font-bold text-gray-300 mb-4">Thesis Data (Detailed View)</h3>
-        <table className="table-auto w-full bg-neutral shadow-lg rounded-lg overflow-hidden">
-          <thead className="bg-gray-800 text-white">
-            <tr>
-              <th className="py-3 px-4 text-left">Thesis Title</th>
-              <th className="py-3 px-4 text-left">Views</th>
-              <th className="py-3 px-4 text-left">Downloads</th>
-            </tr>
-          </thead>
-          <tbody>
-            {thesisData.map((thesis, index) => (
-              <tr
-                key={index}
-                className={
-                  index % 2 === 0 ? "border-b border-gray-700" : "border-b bg-neutral-focus"
-                }
-              >
-                <td className="py-3 px-4 text-white">{thesis.title}</td>
-                <td className="py-3 px-4 text-white">{thesis.views}</td>
-                <td className="py-3 px-4 text-white">{thesis.downloads}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
     </section>
   );
 };
 
-export default Statistics;
+export default withAuthorization(Statistics, ["ADMIN"]);

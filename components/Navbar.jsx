@@ -103,6 +103,9 @@ const Navbar = () => {
             <li>
               <Link href="/contact" className="hover:text-primary">Contact</Link>
             </li>
+            <li>
+              <Link href="/schat" className="hover:text-primary">RealTime Chat</Link>
+            </li>
 
             {!loggedInUser ? (
               <>

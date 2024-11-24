@@ -27,7 +27,6 @@ const Login = () => {
     e.preventDefault();
 
     try {
-      // Make a POST request to the backend login endpoint
       const response = await fetch("/api/users/login", {
         method: "POST",
         headers: {
@@ -36,19 +35,13 @@ const Login = () => {
         body: JSON.stringify(formData),
       });
 
-      // Handle the response from the backend
       if (response.ok) {
         const data = await response.json();
-
-        // Store JWT token or user info in localStorage
-        localStorage.setItem("token", data.token); // Save token for authentication
-        localStorage.setItem("user", JSON.stringify(data.user)); // Save user info
-
-        // Redirect to home or another protected route
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("user", JSON.stringify(data.user));
         router.push("/");
         toast.success("You have successfully logged in.");
       } else {
-        // If the response is not ok, extract the error message
         const errorData = await response.json();
         setErrorMessage(errorData.error || "Login failed");
       }
@@ -57,7 +50,6 @@ const Login = () => {
       setErrorMessage("An error occurred. Please try again later.");
     }
 
-    // Reset form fields
     setFormData({
       email: "",
       password: "",
@@ -65,15 +57,14 @@ const Login = () => {
   };
 
   return (
-    <section className="container mx-auto px-4 py-16">
-      <h2 className="text-3xl font-bold text-center text-gray-400">Login</h2>
-      <div className="mt-10 max-w-2xl mx-auto">
-        <form
-          onSubmit={handleSubmit}
-          className="bg-neutral p-6 rounded-lg shadow-lg text-neutral-content shadow-indigo-500/50"
-        >
+    <section className="flex justify-center items-center min-h-screen bg-gray-900">
+      <div className="w-full max-w-md p-8 bg-gray-800 rounded-lg shadow-lg">
+        <h2 className="text-2xl font-bold text-center text-gray-100 mb-6">
+          Login
+        </h2>
+        <form onSubmit={handleSubmit}>
           <div className="mb-4">
-            <label htmlFor="email" className="block text-white">
+            <label htmlFor="email" className="block text-sm font-medium text-gray-300">
               Email
             </label>
             <input
@@ -81,14 +72,14 @@ const Login = () => {
               id="email"
               name="email"
               placeholder="Enter your email"
-              className="input input-bordered w-full bg-neutral-focus text-neutral-content"
+              className="w-full mt-1 p-2 border border-gray-600 rounded bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
               value={formData.email}
               onChange={handleChange}
               required
             />
           </div>
           <div className="mb-4">
-            <label htmlFor="password" className="block text-white">
+            <label htmlFor="password" className="block text-sm font-medium text-gray-300">
               Password
             </label>
             <input
@@ -96,7 +87,7 @@ const Login = () => {
               id="password"
               name="password"
               placeholder="Enter your password"
-              className="input input-bordered w-full bg-neutral-focus text-neutral-content"
+              className="w-full mt-1 p-2 border border-gray-600 rounded bg-gray-700 text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
               value={formData.password}
               onChange={handleChange}
               required
@@ -105,7 +96,10 @@ const Login = () => {
           {errorMessage && (
             <p className="text-red-500 text-sm mb-4">{errorMessage}</p>
           )}
-          <button type="submit" className="btn btn-primary w-full">
+          <button
+            type="submit"
+            className="w-full py-2 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          >
             Login
           </button>
         </form>

@@ -7,14 +7,12 @@ const Search = () => {
     title: "",
     author: "",
     year: "",
-    keywords: "",
   });
 
   const [results, setResults] = useState([]); // State to store search results
   const [isLoading, setIsLoading] = useState(false); // Loading state
   const [error, setError] = useState(""); // Error state
 
-  // Handle input changes
   const handleChange = (e) => {
     const { name, value } = e.target;
     setSearchInputs({
@@ -23,11 +21,11 @@ const Search = () => {
     });
   };
 
-  // Handle form submit
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
     setError("");
+    setResults([]); // Clear previous results
 
     try {
       const response = await fetch("/api/theses/search", {
@@ -38,32 +36,38 @@ const Search = () => {
         body: JSON.stringify(searchInputs),
       });
 
-      if (response.ok) {
-        const results = await response.json();
-        setResults(results); // Update results state
-      } else {
+      if (!response.ok) {
         const errorData = await response.json();
-        setError(errorData.error || "Failed to fetch search results.");
+        throw new Error(errorData.error || "Failed to fetch search results.");
+      }
+
+      const data = await response.json();
+
+      if (Array.isArray(data) && data.length > 0) {
+        setResults(data);
+      } else {
+        setError("No results found for the provided search criteria.");
       }
     } catch (error) {
-      setError("An error occurred during the search. Please try again.");
-      console.error("Error during search:", error);
+      setError(error.message || "An unexpected error occurred. Please try again.");
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <section className="container mx-auto px-4 py-16">
-      <h2 className="text-3xl font-bold text-center text-gray-400">Search Theses</h2>
-      
-      <div className="mt-10 max-w-2xl mx-auto">
+    <section className="container mx-auto px-4 py-16 min-h-screen bg-gray-900">
+      <h2 className="text-3xl font-bold text-center text-gray-300 mb-8">
+        Search Theses
+      </h2>
+
+      <div className="mt-10 max-w-xl mx-auto">
         <form
           onSubmit={handleSubmit}
-          className="bg-neutral p-6 rounded-lg shadow-lg text-neutral-content shadow-indigo-500/50"
+          className="bg-gray-800 p-6 rounded-lg shadow-lg text-white"
         >
           <div className="mb-4">
-            <label htmlFor="title" className="block text-white">
+            <label htmlFor="title" className="block text-gray-300 mb-2">
               Search by Title
             </label>
             <input
@@ -73,11 +77,11 @@ const Search = () => {
               placeholder="Enter thesis title..."
               value={searchInputs.title}
               onChange={handleChange}
-              className="input input-bordered w-full bg-neutral-focus text-neutral-content"
+              className="input input-bordered w-full bg-gray-700 text-white border border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none p-2"
             />
           </div>
           <div className="mb-4">
-            <label htmlFor="author" className="block text-white">
+            <label htmlFor="author" className="block text-gray-300 mb-2">
               Search by Author
             </label>
             <input
@@ -87,11 +91,11 @@ const Search = () => {
               placeholder="Enter author name..."
               value={searchInputs.author}
               onChange={handleChange}
-              className="input input-bordered w-full bg-neutral-focus text-neutral-content"
+              className="input input-bordered w-full bg-gray-700 text-white border border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none p-2"
             />
           </div>
           <div className="mb-4">
-            <label htmlFor="year" className="block text-white">
+            <label htmlFor="year" className="block text-gray-300 mb-2">
               Search by Year
             </label>
             <input
@@ -101,36 +105,30 @@ const Search = () => {
               placeholder="Enter year..."
               value={searchInputs.year}
               onChange={handleChange}
-              className="input input-bordered w-full bg-neutral-focus text-neutral-content"
+              className="input input-bordered w-full bg-gray-700 text-white border border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none p-2"
             />
           </div>
-          <div className="mb-4">
-            <label htmlFor="keywords" className="block text-white">
-              Search by Keywords
-            </label>
-            <input
-              type="text"
-              id="keywords"
-              name="keywords"
-              placeholder="Enter keywords..."
-              value={searchInputs.keywords}
-              onChange={handleChange}
-              className="input input-bordered w-full bg-neutral-focus text-neutral-content"
-            />
-          </div>
-          <button type="submit" className="btn btn-primary w-full">
+          <button
+            type="submit"
+            className="btn btn-primary w-full mt-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg transition-transform transform hover:scale-105"
+          >
             Search
           </button>
         </form>
       </div>
 
-      {/* Display loading state */}
-      {isLoading && <p className="text-center text-gray-400 mt-6">Loading results...</p>}
+      {isLoading && (
+        <p className="text-center text-gray-300 mt-6 animate-pulse">
+          Searching for theses...
+        </p>
+      )}
 
-      {/* Display error message */}
-      {error && <p className="text-center text-red-500 mt-6">{error}</p>}
+      {error && (
+        <p className="text-center text-red-500 mt-6 bg-red-100 p-3 rounded shadow-md">
+          {error}
+        </p>
+      )}
 
-      {/* Display search results */}
       {results.length > 0 && (
         <div className="mt-10 max-w-4xl mx-auto">
           <h3 className="text-2xl font-bold text-gray-300 mb-4">Search Results</h3>
@@ -138,32 +136,34 @@ const Search = () => {
             {results.map((thesis) => (
               <li
                 key={thesis.id}
-                className="bg-neutral-focus p-4 rounded-lg shadow-md text-neutral-content"
+                className="bg-gray-700 p-6 rounded-lg shadow-md text-white"
               >
-                <h4 className="text-xl font-semibold text-white">{thesis.title}</h4>
-                <p className="text-gray-400">Author: {thesis.author.name}</p>
-                <p className="text-gray-400">Year: {thesis.year}</p>
-                <p className="text-gray-400">Abstract: {thesis.abstract}</p>
-                <p className="text-gray-400">
-                  Keywords: {thesis.keywords.map((k) => k.name).join(", ")}
+                <h4 className="text-xl font-semibold">{thesis.title}</h4>
+                <p className="text-gray-300">Author: {thesis.author?.name || "Unknown"}</p>
+                <p className="text-gray-300">Year: {thesis.year || "N/A"}</p>
+                <p className="text-gray-300">
+                  Abstract: {thesis.abstract || "No abstract available."}
                 </p>
-                <a
-                  href={thesis.fileUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-400 hover:underline"
-                >
-                  Download Thesis
-                </a>
+                {thesis.fileUrl && (
+                  <a
+                    href={thesis.fileUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-indigo-400 hover:underline"
+                  >
+                    Download Thesis
+                  </a>
+                )}
               </li>
             ))}
           </ul>
         </div>
       )}
 
-      {/* Display no results message */}
       {!isLoading && !error && results.length === 0 && (
-        <p className="text-center text-gray-400 mt-6">No results found.</p>
+        <p className="text-center text-gray-400 mt-6">
+          No results found. Try refining your search criteria.
+        </p>
       )}
     </section>
   );

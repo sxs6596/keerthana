@@ -1,22 +1,65 @@
-// middleware.js
+// import { NextResponse } from "next/server";
+
+// export function middleware(req) {
+//   const token = req.cookies.get("token"); // Check for the authentication token in cookies
+
+//   // Redirect to login if no token is found
+//   if (!token) {
+//     return NextResponse.redirect(new URL("/login", req.url));
+//   }
+
+//   // Parse the token to check user roles (You can replace this with your JWT decoding logic)
+//   const user = JSON.parse(atob(token.split(".")[1]));
+
+//   req.nextUrl.pathname = req.nextUrl.pathname || "/";
+
+//   // Example route-based role restriction
+//   if (req.nextUrl.pathname === "/admin" && !user.roles.includes("Admin")) {
+//     return NextResponse.redirect(new URL("/unauthorized", req.url)); // Redirect unauthorized users
+//   }
+
+//   return NextResponse.next(); // Allow access
+// }
+
+// export const config = {
+//   matcher: ["/submit-thesis", "/peer-review", "/admin"], // Protected routes
+// };
+
+// // export const config = {
+// //   matcher: ["/submit-thesis", "/admin"], // Protected routes
+// // };
+
 import { NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 
 export function middleware(req) {
-  const authHeader = req.headers.get("Authorization");
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return NextResponse.redirect(new URL("/login", req.url)); // Redirect to login if unauthorized
+  const token = req.cookies.get("token"); // Check for the authentication token in cookies
+
+  if (!token) {
+    return NextResponse.redirect(new URL("/login", req.url)); // Redirect to login if no token is found
   }
 
-  const token = authHeader.split(" ")[1];
   try {
-    jwt.verify(token, process.env.JWT_SECRET);
-    return NextResponse.next(); // Proceed if JWT is valid
+    const user = jwt.verify(token, process.env.JWT_SECRET); // Verify the token
+    console.log("Authenticated User:", user);
+
+    // Example route-based role restriction
+    if (req.nextUrl.pathname === "/admin" && !user.roles.includes("Admin")) {
+      return NextResponse.redirect(new URL("/unauthorized", req.url)); // Redirect unauthorized users
+    }
   } catch (error) {
-    return NextResponse.redirect(new URL("/login", req.url)); // Redirect on error
+    console.error("Token verification failed:", error);
+    return NextResponse.redirect(new URL("/login", req.url)); // Redirect on verification error
   }
+
+  return NextResponse.next(); // Allow access
 }
 
 export const config = {
-  matcher: ["/api/users/me", "/api/otherProtectedRoute"], // Apply middleware to these routes
+  matcher: ["/admin"], // Protected routes
 };
+
+// export const config = {
+//   matcher: ["/submit-thesis", "/peer-review", "/admin"], // Protected routes
+// };
+
